@@ -22,7 +22,7 @@ def get_case_files(case: str):
 
 def input_data_base(idata: InputData, case: str):
     dt = 365.25  # one report timestep length, [days]
-    n_time_steps = 1 #was 20
+    n_time_steps = 3 #was 20
     idata.sim.time_steps = np.zeros(n_time_steps) + dt
 
     # time stepping and convergence parameters
@@ -82,6 +82,7 @@ def input_data_base(idata: InputData, case: str):
 
     idata.rock.conduction_shale = 2.2 * 86.4 # Shale conductivity kJ/m/day/K
     idata.rock.conduction_sand = 3 * 86.4 # Sandstone conductivity kJ/m/day/K
+
     idata.rock.hcap_shale = 2300 # Shale heat capacity kJ/m3/K
     idata.rock.hcap_sand = 2450 # Sandstone heat capacity kJ/m3/K
 

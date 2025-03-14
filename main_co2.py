@@ -66,13 +66,6 @@ def run(physics_type : str, case: str, out_dir: str, export_vtk=True, redirect_l
     satnum_array = np.array(m.reservoir.satnum, copy=False) - 1 #
     m.reservoir.mesh.op_num = index_vector([int(x) for x in satnum_array] + [0, 0])
 
-    #m.reservoir.mesh.op_num = index_vector(list(satnum_array) + [0, 0]) # Get SATNUM array
-
-    # op_num = np.zeros(m.reservoir.permx.shape, dtype = np.int32)
-    # op_num[m.reservoir.permx >= 90] = int(1) #sand
-    # op_num[m.reservoir.permx < 90] = int(2) #shale
-
-    #m.reservoir.mesh.op_num = index_vector(list(op_num))
 
     # m.reservoir.save_grdecl(m.get_arrays(ith_step=0), os.path.join(out_dir, 'res_init')) #NEW not sure if it works for CCS #doesn't work for test case
 
@@ -246,7 +239,8 @@ if __name__ == '__main__':
     #cases_list += ['generate_5x3x4']
     #cases_list += ['generate_51x51x1']
     #cases_list += ['generate_100x100x100']
-    cases_list += ['case_40x40x10']
+    #cases_list += ['case_40x40x10']
+    cases_list += ['20x20x10']
     #cases_list += ['brugge']
     #cases_list += ['case_test_own_FM3_CO1_G1_TS1_PIX']
     #cases_list += ['case_test_own_FM3_CO1_G1_TS1_PIX_2']

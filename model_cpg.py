@@ -1,7 +1,7 @@
 import numpy as np
 import os
-
-from darts.reservoirs.cpg_reservoir import CPG_Reservoir, save_array, read_arrays, check_arrays, make_burden_layers, make_full_cube
+from Darts_Packages_Adjusted.cpg_reservoir import CPG_Reservoir, save_array, read_arrays, check_arrays, make_burden_layers, make_full_cube
+#from darts.reservoirs.cpg_reservoir import CPG_Reservoir, save_array, read_arrays, check_arrays, make_burden_layers, make_full_cube
 from darts.discretizer import load_single_float_keyword
 from darts.engines import value_vector
 
@@ -55,6 +55,7 @@ class Model_CPG(CICDModel):
         self.reservoir = CPG_Reservoir(self.timer, arrays, faultfile=self.idata.faultfile, minpv=self.idata.geom.minpv) #NEW #was self.reservoir = CPG_Reservoir(self.timer, arrays, minpv=self.idata.geom.minpv)
         self.reservoir.discretize()
 
+
         # store modified arrrays (with burden layers) for output to grdecl
         self.reservoir.input_arrays = arrays
 
@@ -67,27 +68,15 @@ class Model_CPG(CICDModel):
         self.reservoir.set_boundary_volume(xz_minus=bv, xz_plus=bv, yz_minus=bv, yz_plus=bv)
         self.reservoir.apply_volume_depth()
 
-        # poro_shale_threshold = self.idata.rock.poro_shale_threshold  # short name #Old
-        # poro = np.array(self.reservoir.mesh.poro) #Old
-        # self.reservoir.conduction[poro <= poro_shale_threshold] = self.idata.rock.conduction_shale #Old
-        # self.reservoir.conduction[poro > poro_shale_threshold] = self.idata.rock.conduction_sand #Old
 
-        #self.reservoir.hcap[poro <= poro_shale_threshold] = self.idata.rock.hcap_shale #Naar kijken #Old
-        #self.reservoir.hcap[poro > poro_shale_threshold] = self.idata.rock.hcap_sand #Naar kijken #Old
-
-        # Get SATNUM values ONLY for active cells #NEW
         # Get the SATNUM values stored in the reservoir #NEW
         satnum_full = np.array(self.reservoir.satnum)  # Full SATNUM, including inactive cells #NEW
 
         # Get the mapping of active cells #NEW
-        global_to_local = np.array(self.reservoir.discr_mesh.global_to_local, copy=False) #NEW
+        global_to_local = np.array(self.reservoir.discr_mesh.global_to_local, copy=False)  # NEW
 
         # Select only active cell SATNUM values #NEW
-        satnum_active = satnum_full[global_to_local >= 0] #NEW
-
-        # Debugging Print #NEW
-        #print(f" SATNUM shape (active cells): {satnum_active.shape} | Expected: {self.reservoir.conduction.shape}") #NEW
-        print(self.idata.rock.conduction_shale)
+        # satnum_active = satnum_full[global_to_local >= 0]  # NEW
 
         mask_shale = (satnum_full == 3) & (global_to_local >= 0)
         mask_sand = ((satnum_full == 1) | (satnum_full == 2)) & (global_to_local >= 0)
@@ -98,25 +87,14 @@ class Model_CPG(CICDModel):
         self.reservoir.hcap[mask_shale] = self.idata.rock.hcap_shale
         self.reservoir.hcap[mask_sand] = self.idata.rock.hcap_sand
 
-        # # 🏗 Assign rock properties based on SATNUM: #NEW
-        # self.reservoir.conduction[satnum_active == 3] = self.idata.rock.conduction_shale  # SH = 3 #NEW
-        # self.reservoir.conduction[satnum_active == 2] = self.idata.rock.conduction_sand
-        # self.reservoir.conduction[satnum_active == 1] = self.idata.rock.conduction_sand
-        #
-        # #self.reservoir.conduction[(satnum_active == 1) | (satnum_active == 2)] = self.idata.rock.conduction_sand  # SS = 1 or 2 #NEW
-        #
-        # self.reservoir.hcap[satnum_active == 3] = self.idata.rock.hcap_shale
-        # self.reservoir.hcap[satnum_active == 2] = self.idata.rock.hcap_sand # Shale heat capacity #NEW
-        # self.reservoir.hcap[satnum_active == 1] = self.idata.rock.hcap_sand
-
-        # self.reservoir.hcap[ #NEW
-        #     (satnum_active == 1) | (satnum_active == 2)] = self.idata.rock.hcap_sand  # Sandstone heat capacity #NEW
 
         # add hcap and rcond to be saved into mesh.vtu
         l2g = np.array(self.reservoir.discr_mesh.local_to_global, copy=False)
         g2l = np.array(self.reservoir.discr_mesh.global_to_local, copy=False)
+
         self.reservoir.global_data.update({'heat_capacity': make_full_cube(self.reservoir.hcap, l2g, g2l),
-                                           'rock_conduction': make_full_cube(self.reservoir.conduction, l2g, g2l) })
+                                           'rock_conduction': make_full_cube(self.reservoir.conduction, l2g, g2l)})
+                                           # 'rock_conduction': make_full_cube(self.reservoir.conduction, l2g, g2l) })
 
         self.set_physics()
 
